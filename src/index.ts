@@ -685,4 +685,5 @@ export {
   TransactionalEmail,
   ListTransactionalsResponse,
   MailingLists,
+  QueryOptions,
 };
