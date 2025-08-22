@@ -359,20 +359,29 @@ class LoopsClient {
   /**
    * Create a new contact.
    *
-   * @param {string} email The email address of the contact.
-   * @param {Object} [properties] All other contact properties, including custom properties.
-   * @param {Object} [mailingLists] An object of mailing list IDs and boolean subscription statuses.
+   * @param {Object} params
+   * @param {string} params.email The email address of the contact.
+   * @param {Object} [params.properties] All other contact properties, including custom properties.
+   * @param {Object} [params.mailingLists] An object of mailing list IDs and boolean subscription statuses.
    *
    * @see https://loops.so/docs/api-reference/create-contact
    *
    * @returns {Object} Contact record (JSON)
    */
-  async createContact(
-    email: string,
-    properties?: ContactProperties,
-    mailingLists?: MailingLists
-  ): Promise<ContactSuccessResponse> {
-    const payload = { email, ...properties, mailingLists };
+  async createContact({
+    email,
+    properties,
+    mailingLists,
+  }: {
+    email: string;
+    properties?: ContactProperties;
+    mailingLists?: MailingLists;
+  }): Promise<ContactSuccessResponse> {
+    const payload = { ...properties, mailingLists } as {
+      email?: string;
+      mailingLists?: MailingLists;
+    } & ContactProperties;
+    payload["email"] = email;
     return this._makeQuery({
       path: "v1/contacts/create",
       method: "POST",
@@ -383,20 +392,41 @@ class LoopsClient {
   /**
    * Update a contact.
    *
-   * @param {string} email The email address of the contact.
-   * @param {Object} properties All other contact properties, including custom properties.
-   * @param {Object} [mailingLists] An object of mailing list IDs and boolean subscription statuses.
+   * @param {Object} params
+   * @param {string} [params.email] The email address of the contact.
+   * @param {string} [params.userId] The user ID of the contact.
+   * @param {Object} [params.properties] All other contact properties, including custom properties.
+   * @param {Object} [params.mailingLists] An object of mailing list IDs and boolean subscription statuses.
    *
    * @see https://loops.so/docs/api-reference/update-contact
    *
    * @returns {Object} Contact record (JSON)
    */
-  async updateContact(
-    email: string,
-    properties: ContactProperties,
-    mailingLists?: MailingLists
-  ): Promise<ContactSuccessResponse> {
-    const payload = { email, ...properties, mailingLists };
+  async updateContact({
+    email,
+    userId,
+    properties,
+    mailingLists,
+  }: {
+    email?: string;
+    userId?: string;
+    properties?: ContactProperties;
+    mailingLists?: MailingLists;
+  }): Promise<ContactSuccessResponse> {
+    if (!userId && !email)
+      throw new ValidationError(
+        "You must provide an `email` or `userId` value."
+      );
+    const payload = {
+      ...properties,
+      mailingLists,
+    } as {
+      email?: string;
+      userId?: string;
+      mailingLists?: MailingLists;
+    } & ContactProperties;
+    if (email) payload["email"] = email;
+    if (userId) payload["userId"] = userId;
     return this._makeQuery({
       path: "v1/contacts/update",
       method: "PUT",
@@ -489,8 +519,8 @@ class LoopsClient {
       path: "v1/contacts/properties",
       method: "POST",
       payload: {
-        ["name"]: name,
-        ["type"]: type,
+        name,
+        type,
       },
     });
   }
@@ -568,7 +598,7 @@ class LoopsClient {
       userId?: string;
       eventName: string;
       eventProperties?: EventProperties;
-      mailingLists?: Record<string, boolean>;
+      mailingLists?: MailingLists;
     } = {
       eventName,
       ...contactProperties,

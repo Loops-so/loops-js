@@ -155,21 +155,21 @@ Create a new contact.
 #### Examples
 
 ```javascript
-const resp = await loops.createContact("hello@gmail.com");
+const resp = await loops.createContact({ email: "hello@gmail.com" });
 
 const contactProperties = {
   firstName: "Bob" /* Default property */,
   favoriteColor: "Red" /* Custom property */,
 };
 const mailingLists = {
-  cm06f5v0e45nf0ml5754o9cix: true,
-  cm16k73gq014h0mmj5b6jdi9r: false,
+  cm06f5v0e45nf0ml5754o9cix: true /* Subscribe */,
+  cm16k73gq014h0mmj5b6jdi9r: false /* Unsubscribe */,
 };
-const resp = await loops.createContact(
-  "hello@gmail.com",
-  contactProperties,
-  mailingLists
-);
+const resp = await loops.createContact({
+  email: "hello@gmail.com",
+  properties: contactProperties,
+  mailingLists,
+});
 ```
 
 #### Response
@@ -195,7 +195,7 @@ HTTP 400 Bad Request
 
 ### updateContact()
 
-Update a contact.
+Update a contact. This method will create a contact if one doesn't already exist.
 
 Note: To update a contact's email address, the contact requires a `userId` value. Then you can make a request with their `userId` and an updated email address.
 
@@ -205,22 +205,34 @@ Note: To update a contact's email address, the contact requires a `userId` value
 
 | Name           | Type   | Required | Notes                                                                                                                                                                                                                                                                                                                                                                                                                |
 | -------------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `email`        | string | Yes      | The email address of the contact to update. If there is no contact with this email address, a new contact will be created using the email and properties in this request.                                                                                                                                                                                                                                            |
+| `email`        | string | No       | The email address of the contact to update. If there is no contact with this email address, a new contact will be created using the email and properties in this request. Required if `userId` is not present.                                                                                                                                                                                                       |
+| `userId`       | string | No       | The contact's unique user ID. If you use `userId` without `email`, this value must have already been added to your contact in Loops. Required if `email` is not present.                                                                                                                                                                                                                                             |
 | `properties`   | object | No       | An object containing default and any custom properties for your contact.<br />Please [add custom properties](https://loops.so/docs/contacts/properties#custom-contact-properties) in your Loops account before using them with the SDK.<br />Values can be of type `string`, `number`, `null` (to reset a value), `boolean` or `date` ([see allowed date formats](https://loops.so/docs/contacts/properties#dates)). |
 | `mailingLists` | object | No       | An object of mailing list IDs and boolean subscription statuses.                                                                                                                                                                                                                                                                                                                                                     |
 
 #### Example
 
 ```javascript
-const contactProperties = {
-  firstName: "Bob" /* Default property */,
-  favoriteColor: "Blue" /* Custom property */,
-};
-const resp = await loops.updateContact("hello@gmail.com", contactProperties);
+const resp = await loops.updateContact({
+  email: "hello@gmail.com",
+  properties: {
+    firstName: "Bob" /* Default property */,
+    favoriteColor: "Blue" /* Custom property */,
+  },
+});
 
 /* Updating a contact's email address using userId */
-const resp = await loops.updateContact("newemail@gmail.com", {
+const resp = await loops.updateContact({
   userId: "1234",
+  email: "newemail@gmail.com",
+});
+
+/* Subscribe a contact to a mailing list */
+const resp = await loops.updateContact({
+  email: "hello@gmail.com",
+  mailingLists: {
+    cm06f5v0e45nf0ml5754o9cix: true,
+  },
 });
 ```
 
@@ -754,6 +766,7 @@ const resp = await loops.getTransactionalEmails({ perPage: 15 });
 
 ## Version history
 
+- `v6.0.0` (Aug 22, 2025) - [`createContact()`](#createcontact) and [`updateContact()`](#updatecontact) now have a single object parameter instead of named parameters (breaking change). This allows support for using either `email` or `userId` when updating contacts.
 - `v5.0.1` (May 13, 2025) - Added a `headers` parameter for [`sendEvent()`](#sendevent) and [`sendTransactionalEmail()`](#sendtransactionalemail), enabling support for the `Idempotency-Key` header.
 - `v5.0.0` (Apr 29, 2025)
   - Types are now exported so you can use them in your application.

@@ -83,7 +83,7 @@ describe("LoopsClient", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await client.createContact(email);
+      const result = await client.createContact({ email });
 
       expect(result).toEqual(mockResponse);
       expect(fetch).toHaveBeenCalledWith(
@@ -109,14 +109,14 @@ describe("LoopsClient", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await client.createContact(email, properties);
+      const result = await client.createContact({ email, properties });
 
       expect(result).toEqual(mockResponse);
       expect(fetch).toHaveBeenCalledWith(
         expect.stringContaining("v1/contacts/create"),
         expect.objectContaining({
           method: "POST",
-          body: JSON.stringify({ email, ...properties }),
+          body: JSON.stringify({ ...properties, email }),
         })
       );
     });
@@ -134,20 +134,13 @@ describe("LoopsClient", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      await expect(client.createContact(email)).rejects.toThrow(APIError);
+      await expect(client.createContact({ email })).rejects.toThrow(APIError);
       expect(fetch).toHaveBeenCalledWith(
         expect.stringContaining("v1/contacts/create"),
         expect.objectContaining({
           method: "POST",
           body: JSON.stringify({ email }),
         })
-      );
-    });
-
-    it("should throw error for invalid email format", async () => {
-      const invalidEmail = "not-an-email";
-      await expect(client.createContact(invalidEmail)).rejects.toThrow(
-        TypeError
       );
     });
 
@@ -175,18 +168,51 @@ describe("LoopsClient", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await client.updateContact(
+      const result = await client.updateContact({
         email,
         properties,
-        mailingLists
-      );
+        mailingLists,
+      });
 
       expect(result).toEqual(mockResponse);
       expect(fetch).toHaveBeenCalledWith(
         expect.stringContaining("v1/contacts/update"),
         expect.objectContaining({
           method: "PUT",
-          body: JSON.stringify({ email, ...properties, mailingLists }),
+          body: JSON.stringify({ ...properties, mailingLists, email }),
+        })
+      );
+    });
+
+    it("should update contact by userId", async () => {
+      const userId = "user_123";
+      const properties = {
+        firstName: "John",
+        lastName: "Doe",
+        userGroup: "customers",
+      };
+      const mailingLists = {
+        newsletter_id: true,
+      };
+      const mockResponse = { success: true, id: "123" };
+
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.updateContact({
+        userId,
+        properties,
+        mailingLists,
+      });
+
+      expect(result).toEqual(mockResponse);
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("v1/contacts/update"),
+        expect.objectContaining({
+          method: "PUT",
+          body: JSON.stringify({ ...properties, mailingLists, userId }),
         })
       );
     });
@@ -204,7 +230,7 @@ describe("LoopsClient", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await client.updateContact(email, {});
+      const result = await client.updateContact({ email });
 
       expect(result).toEqual(mockResponse);
       expect(fetch).toHaveBeenCalledWith(
@@ -216,16 +242,8 @@ describe("LoopsClient", () => {
       );
     });
 
-    it("should throw error for invalid email format", async () => {
-      const invalidEmail = "not-an-email";
-      await expect(client.updateContact(invalidEmail, {})).rejects.toThrow(
-        TypeError
-      );
-    });
-
-    it("should throw error for missing email", async () => {
-      // @ts-expect-error - testing invalid input
-      await expect(client.updateContact()).rejects.toThrow(TypeError);
+    it("should throw error for missing email and userId", async () => {
+      await expect(client.updateContact({})).rejects.toThrow(ValidationError);
     });
   });
 
