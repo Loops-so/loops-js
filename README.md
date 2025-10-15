@@ -81,6 +81,7 @@ Each contact in Loops has a set of default properties. These will always be retu
 - `subscribed`
 - `userGroup`
 - `userId`
+- `optInStatus`
 
 ## Custom contact properties
 
