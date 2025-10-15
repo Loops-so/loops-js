@@ -66,8 +66,14 @@ type Contact = {
   userId: string | null;
   /**
    * Mailing lists the contact is subscribed to.
+   * @see https://loops.so/docs/contacts/mailing-lists
    */
   mailingLists: Record<string, true>;
+  /**
+   * The contact's double opt-in status.
+   * @see https://loops.so/docs/contacts/double-opt-in
+   */
+  optInStatus: "pending" | "accepted" | "rejected" | null;
 } & Record<string, string | number | boolean | null>;
 
 interface ContactPropertySuccessResponse {
@@ -251,8 +257,8 @@ class APIError extends Error {
     this.json = json;
 
     // This captures the proper stack trace in most environments
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, APIError);
+    if ((Error as any).captureStackTrace) {
+      (Error as any).captureStackTrace(this, APIError);
     }
   }
 }
