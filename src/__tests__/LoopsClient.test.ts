@@ -121,6 +121,53 @@ describe("LoopsClient", () => {
       );
     });
 
+    it("should create a contact with explicit fields and mailing lists", async () => {
+      const email = "test@example.com";
+      const properties = {
+        plan: "pro",
+      };
+      const mailingLists = {
+        list_id: true,
+      };
+      const mockResponse = { success: true, id: "123" };
+
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.createContact({
+        email,
+        firstName: "Jane",
+        lastName: "Doe",
+        source: "signup",
+        subscribed: false,
+        userGroup: "beta",
+        userId: "user_123",
+        properties,
+        mailingLists,
+      });
+
+      expect(result).toEqual(mockResponse);
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("v1/contacts/create"),
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({
+            ...properties,
+            email,
+            firstName: "Jane",
+            lastName: "Doe",
+            source: "signup",
+            subscribed: false,
+            userGroup: "beta",
+            userId: "user_123",
+            mailingLists,
+          }),
+        })
+      );
+    });
+
     it("should handle error when contact already exists", async () => {
       const email = "existing@example.com";
       const mockResponse = {

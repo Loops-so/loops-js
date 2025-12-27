@@ -32,7 +32,7 @@ import { LoopsClient, APIError } from "loops";
 const loops = new LoopsClient(process.env.LOOPS_API_KEY);
 
 try {
-  const resp = await loops.createContact("email@provider.com");
+  const resp = await loops.createContact({ email: "email@provider.com" });
   // resp.success and resp.id available when successful
 } catch (error) {
   if (error instanceof APIError) {
@@ -58,7 +58,7 @@ import { LoopsClient, APIError, RateLimitExceededError } from "loops";
 const loops = new LoopsClient(process.env.LOOPS_API_KEY);
 
 try {
-  const resp = await loops.createContact("email@provider.com");
+  const resp = await loops.createContact({ email: "email@provider.com" });
 } catch (error) {
   if (error instanceof RateLimitExceededError) {
     console.log(`Rate limit exceeded (${error.limit} per second)`);
@@ -147,11 +147,17 @@ Create a new contact.
 
 #### Parameters
 
-| Name           | Type   | Required | Notes                                                                                                                                                                                                                                                                                                                                                                                                                |
-| -------------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `email`        | string | Yes      | If a contact already exists with this email address, an error response will be returned.                                                                                                                                                                                                                                                                                                                             |
-| `properties`   | object | No       | An object containing default and any custom properties for your contact.<br />Please [add custom properties](https://loops.so/docs/contacts/properties#custom-contact-properties) in your Loops account before using them with the SDK.<br />Values can be of type `string`, `number`, `null` (to reset a value), `boolean` or `date` ([see allowed date formats](https://loops.so/docs/contacts/properties#dates)). |
-| `mailingLists` | object | No       | An object of mailing list IDs and boolean subscription statuses.                                                                                                                                                                                                                                                                                                                                                     |
+| Name           | Type    | Required | Notes                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `email`        | string  | Yes      | If a contact already exists with this email address, an error response will be returned.                                                                                                                                                                                                                                                                                                                             |
+| `firstName`    | string  | No       | The contact's first name.                                                                                                                                                                                                                                                                                                                                                                                            |
+| `lastName`     | string  | No       | The contact's last name.                                                                                                                                                                                                                                                                                                                                                                                             |
+| `source`       | string  | No       | The source the contact was created from.                                                                                                                                                                                                                                                                                                                                                                              |
+| `subscribed`   | boolean | No       | Whether the contact will receive campaign and Loops emails.                                                                                                                                                                                                                                                                                                                                                          |
+| `userGroup`    | string  | No       | The contact's user group (used to segment users when sending emails).                                                                                                                                                                                                                                                                                                                                                |
+| `userId`       | string  | No       | A unique user ID (for example, from an external application).                                                                                                                                                                                                                                                                                                                                                        |
+| `properties`   | object  | No       | An object containing default and any custom properties for your contact.<br />Please [add custom properties](https://loops.so/docs/contacts/properties#custom-contact-properties) in your Loops account before using them with the SDK.<br />Values can be of type `string`, `number`, `null` (to reset a value), `boolean` or `date` ([see allowed date formats](https://loops.so/docs/contacts/properties#dates)). |
+| `mailingLists` | object  | No       | An object of mailing list IDs and boolean subscription statuses.                                                                                                                                                                                                                                                                                                                                                     |
 
 #### Examples
 
@@ -159,7 +165,6 @@ Create a new contact.
 const resp = await loops.createContact({ email: "hello@gmail.com" });
 
 const contactProperties = {
-  firstName: "Bob" /* Default property */,
   favoriteColor: "Red" /* Custom property */,
 };
 const mailingLists = {
@@ -168,6 +173,12 @@ const mailingLists = {
 };
 const resp = await loops.createContact({
   email: "hello@gmail.com",
+  firstName: "Bob",
+  lastName: "Smith",
+  source: "marketing-site",
+  subscribed: true,
+  userGroup: "customers",
+  userId: "user_123",
   properties: contactProperties,
   mailingLists,
 });

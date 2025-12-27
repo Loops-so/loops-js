@@ -111,6 +111,29 @@ type EventProperties = Record<string, string | number | boolean>;
 
 type MailingLists = Record<string, boolean>;
 
+type CreateContactParams = {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  source?: string;
+  subscribed?: boolean;
+  userGroup?: string;
+  userId?: string;
+  properties?: ContactProperties;
+  mailingLists?: MailingLists;
+};
+
+type CreateContactPayload = {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  source?: string;
+  subscribed?: boolean;
+  userGroup?: string;
+  userId?: string;
+  mailingLists?: MailingLists;
+} & ContactProperties;
+
 type TransactionalVariables = Record<string, string | number>;
 
 interface TransactionalAttachment {
@@ -212,6 +235,12 @@ interface ListTransactionalsResponse {
   pagination: PaginationData;
   data: TransactionalEmail[];
 }
+
+// Helper function to remove undefined values from an object
+const removeUndefined = <T extends Record<string, unknown>>(value: T): T =>
+  Object.fromEntries(
+    Object.entries(value).filter(([, entryValue]) => entryValue !== undefined)
+  ) as T;
 
 class RateLimitExceededError extends Error {
   limit: number;
@@ -367,6 +396,12 @@ class LoopsClient {
    *
    * @param {Object} params
    * @param {string} params.email The email address of the contact.
+   * @param {string} [params.firstName] The contact's first name.
+   * @param {string} [params.lastName] The contact's last name.
+   * @param {string} [params.source] The source the contact was created from.
+   * @param {boolean} [params.subscribed] Whether the contact will receive campaign and loops emails.
+   * @param {string} [params.userGroup] The contact's user group.
+   * @param {string} [params.userId] A unique user ID (for example, from an external application).
    * @param {Object} [params.properties] All other contact properties, including custom properties.
    * @param {Object} [params.mailingLists] An object of mailing list IDs and boolean subscription statuses.
    *
@@ -376,18 +411,26 @@ class LoopsClient {
    */
   async createContact({
     email,
+    firstName,
+    lastName,
+    source,
+    subscribed,
+    userGroup,
+    userId,
     properties,
     mailingLists,
-  }: {
-    email: string;
-    properties?: ContactProperties;
-    mailingLists?: MailingLists;
-  }): Promise<ContactSuccessResponse> {
-    const payload = { ...properties, mailingLists } as {
-      email?: string;
-      mailingLists?: MailingLists;
-    } & ContactProperties;
-    payload["email"] = email;
+  }: CreateContactParams): Promise<ContactSuccessResponse> {
+    const payload = removeUndefined({
+      ...properties,
+      email,
+      firstName,
+      lastName,
+      source,
+      subscribed,
+      userGroup,
+      userId,
+      mailingLists,
+    }) as CreateContactPayload;
     return this._makeQuery({
       path: "v1/contacts/create",
       method: "POST",
