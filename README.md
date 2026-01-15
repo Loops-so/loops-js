@@ -624,7 +624,7 @@ Send a transactional email to a contact. [Learn about sending transactional emai
 | `transactionalId`           | string   | Yes      | The ID of the transactional email to send.                                                                                                                                                       |
 | `email`                     | string   | Yes      | The email address of the recipient.                                                                                                                                                              |
 | `addToAudience`             | boolean  | No       | If `true`, a contact will be created in your audience using the `email` value (if a matching contact doesn’t already exist).                                                                     |
-| `dataVariables`             | object   | No       | An object containing data as defined by the data variables added to the transactional email template.<br />Values can be of type `string` or `number`.                                           |
+| `dataVariables`             | object   | No       | An object containing data as defined by the data variables added to the transactional email template.<br />Values can be of type `string`, `number`, or an array of objects with `string` or `number` values.                                           |
 | `attachments`               | object[] | No       | A list of attachments objects.<br />**Please note**: Attachments need to be enabled on your account before using them with the API. [Read more](https://loops.so/docs/transactional/attachments) |
 | `attachments[].filename`    | string   | No       | The name of the file, shown in email clients.                                                                                                                                                    |
 | `attachments[].contentType` | string   | No       | The MIME type of the file.                                                                                                                                                                       |
@@ -768,6 +768,7 @@ const resp = await loops.getTransactionalEmails({ perPage: 15 });
 
 ## Version history
 
+- `v6.0.2` (Jan 15, 2026) - Updated `TransactionalVariables` type to support arrays of objects with `string` or `number` values in [`sendTransactionalEmail()`](#sendtransactionalemail).
 - `v6.0.1` (Oct 15, 2025) - Added `optInStatus` to contact object in [`findContact()`](#findcontact) for the new double opt-in feature.
 - `v6.0.0` (Aug 22, 2025) - [`createContact()`](#createcontact) and [`updateContact()`](#updatecontact) now have a single object parameter instead of named parameters (breaking change). This allows support for using either `email` or `userId` when updating contacts.
 - `v5.0.1` (May 13, 2025) - Added a `headers` parameter for [`sendEvent()`](#sendevent) and [`sendTransactionalEmail()`](#sendtransactionalemail), enabling support for the `Idempotency-Key` header.
