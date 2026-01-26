@@ -37,9 +37,11 @@ try {
 } catch (error) {
   if (error instanceof APIError) {
     // JSON returned by the API is in error.json and the HTTP code is in error.statusCode
-    // Error messages explaining the issue can be found in error.json.message
+    // error.json may be null if the response was not valid JSON (e.g., from a load balancer)
+    // In that case, the raw response text is available in error.rawBody
     console.log(error.json);
     console.log(error.statusCode);
+    console.log(error.rawBody);
   } else {
     // Non-API errors
   }
