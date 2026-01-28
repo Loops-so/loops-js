@@ -230,7 +230,9 @@ class APIError extends Error {
     | ErrorResponse
     | TransactionalError
     | TransactionalNestedError
-    | ApiKeyErrorResponse;
+    | ApiKeyErrorResponse
+    | null;
+  rawBody?: string;
   constructor(
     statusCode: number,
     json:
@@ -238,23 +240,28 @@ class APIError extends Error {
       | TransactionalError
       | TransactionalNestedError
       | ApiKeyErrorResponse
+      | null,
+    rawBody?: string
   ) {
     let message: string | undefined;
-    if (
-      "error" in json &&
-      typeof json.error === "object" &&
-      json.error?.message
-    ) {
-      message = json.error.message;
-    } else if ("error" in json && typeof json.error === "string") {
-      message = json.error;
-    } else if ("message" in json && typeof json.message === "string") {
-      message = json.message;
+    if (json !== null) {
+      if (
+        "error" in json &&
+        typeof json.error === "object" &&
+        json.error?.message
+      ) {
+        message = json.error.message;
+      } else if ("error" in json && typeof json.error === "string") {
+        message = json.error;
+      } else if ("message" in json && typeof json.message === "string") {
+        message = json.message;
+      }
     }
     super(`${statusCode}${message ? ` - ${message}` : ""}`);
     this.name = "APIError";
     this.statusCode = statusCode;
     this.json = json;
+    this.rawBody = rawBody;
 
     // This captures the proper stack trace in most environments
     if ((Error as any).captureStackTrace) {
@@ -317,36 +324,43 @@ class LoopsClient {
       );
     }
 
-    try {
-      const response = await fetch(url.href, {
-        method,
-        headers: h,
-        body: payload ? JSON.stringify(payload) : undefined,
-      });
+    const response = await fetch(url.href, {
+      method,
+      headers: h,
+      body: payload ? JSON.stringify(payload) : undefined,
+    });
 
-      if (response.status === 429) {
-        // Handle rate limiting
-        const limit = parseInt(
-          response.headers.get("x-ratelimit-limit") || "10",
-          10
-        );
-        const remaining = parseInt(
-          response.headers.get("x-ratelimit-remaining") || "10",
-          10
-        );
-        throw new RateLimitExceededError(limit, remaining);
-      }
-
-      // All other status codes from API, throw an error
-      if (!response.ok) {
-        const json = await response.json();
-        throw new APIError(response.status, json);
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
+    if (response.status === 429) {
+      const limit = parseInt(
+        response.headers.get("x-ratelimit-limit") || "10",
+        10
+      );
+      const remaining = parseInt(
+        response.headers.get("x-ratelimit-remaining") || "10",
+        10
+      );
+      throw new RateLimitExceededError(limit, remaining);
     }
+
+    const text = await response.text();
+    let json = null;
+
+    try {
+      json = JSON.parse(text);
+    } catch {
+      // JSON parsing failed
+    }
+
+    // All other status codes from API, throw an error
+    if (!response.ok) {
+      throw new APIError(response.status, json, json === null ? text : undefined);
+    }
+
+    if (json === null) {
+      throw new APIError(response.status, null, text);
+    }
+
+    return json;
   }
 
   /**
