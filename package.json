@@ -24,6 +24,7 @@
   },
   "files": [
     "./dist/*",
+    "./.github/PULL_REQUEST_TEMPLATE.md",
     "README.md",
     "CONTRIBUTING.md",
     "CODE_OF_CONDUCT.md"
