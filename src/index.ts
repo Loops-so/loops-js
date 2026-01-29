@@ -111,7 +111,10 @@ type EventProperties = Record<string, string | number | boolean>;
 
 type MailingLists = Record<string, boolean>;
 
-type TransactionalVariables = Record<string, string | number>;
+type TransactionalVariables = Record<
+  string,
+  string | number | Array<Record<string, string | number>>
+>;
 
 interface TransactionalAttachment {
   /**
