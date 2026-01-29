@@ -298,7 +298,7 @@ class LoopsClient {
    * @param {Object} params.payload Payload for PUT and POST requests
    * @param {Object} params.params URL query parameters
    */
-  private async _makeQuery<T>({
+  protected async _makeQuery<T>({
     path,
     method = "GET",
     headers,
@@ -735,4 +735,5 @@ export {
   TransactionalEmail,
   ListTransactionalsResponse,
   MailingLists,
+  QueryOptions,
 };
