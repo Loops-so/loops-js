@@ -770,7 +770,7 @@ const resp = await loops.getTransactionalEmails({ perPage: 15 });
 
 ## Version history
 
-- `v6.1.3` (Feb 5, 2026) - Updated `TransactionalVariables` type to support arrays of objects with `string` or `number` values in [`sendTransactionalEmail()`](#sendtransactionalemail).
+- `v6.2.0` (Feb 5, 2026) - Support for the new arrays feature in sendTransactionalEmail.
 - `v6.1.2` (Jan 29, 2026) - Added `rawBody` to `APIError` in the case no JSON is received from the server (thanks to [@leipert](https://github.com/leipert)).
 - `v6.0.1` (Oct 15, 2025) - Added `optInStatus` to contact object in [`findContact()`](#findcontact) for the new double opt-in feature.
 - `v6.0.0` (Aug 22, 2025) - [`createContact()`](#createcontact) and [`updateContact()`](#updatecontact) now have a single object parameter instead of named parameters (breaking change). This allows support for using either `email` or `userId` when updating contacts.
