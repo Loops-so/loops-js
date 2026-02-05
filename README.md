@@ -37,9 +37,11 @@ try {
 } catch (error) {
   if (error instanceof APIError) {
     // JSON returned by the API is in error.json and the HTTP code is in error.statusCode
-    // Error messages explaining the issue can be found in error.json.message
+    // error.json may be null if the response was not valid JSON (e.g., from a load balancer)
+    // In that case, the raw response text is available in error.rawBody
     console.log(error.json);
     console.log(error.statusCode);
+    console.log(error.rawBody);
   } else {
     // Non-API errors
   }
@@ -768,7 +770,8 @@ const resp = await loops.getTransactionalEmails({ perPage: 15 });
 
 ## Version history
 
-- `v6.0.2` (Jan 15, 2026) - Updated `TransactionalVariables` type to support arrays of objects with `string` or `number` values in [`sendTransactionalEmail()`](#sendtransactionalemail).
+- `v6.1.1` (Feb 5, 2026) - Updated `TransactionalVariables` type to support arrays of objects with `string` or `number` values in [`sendTransactionalEmail()`](#sendtransactionalemail).
+- `v6.1.0` (Jan 29, 2026) - Added `rawBody` to `APIError` in the case no JSON is received from the server (thanks to [@leipert](https://github.com/leipert)).
 - `v6.0.1` (Oct 15, 2025) - Added `optInStatus` to contact object in [`findContact()`](#findcontact) for the new double opt-in feature.
 - `v6.0.0` (Aug 22, 2025) - [`createContact()`](#createcontact) and [`updateContact()`](#updatecontact) now have a single object parameter instead of named parameters (breaking change). This allows support for using either `email` or `userId` when updating contacts.
 - `v5.0.1` (May 13, 2025) - Added a `headers` parameter for [`sendEvent()`](#sendevent) and [`sendTransactionalEmail()`](#sendtransactionalemail), enabling support for the `Idempotency-Key` header.

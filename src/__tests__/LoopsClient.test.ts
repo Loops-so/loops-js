@@ -31,7 +31,7 @@ describe("LoopsClient", () => {
       const mockResponse = { success: true, teamName: "Test Team" };
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       const result = await client.testApiKey();
@@ -48,7 +48,7 @@ describe("LoopsClient", () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 401,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       await expect(client.testApiKey()).rejects.toThrow(APIError);
@@ -80,7 +80,7 @@ describe("LoopsClient", () => {
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       const result = await client.createContact({ email });
@@ -106,7 +106,7 @@ describe("LoopsClient", () => {
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       const result = await client.createContact({ email, properties });
@@ -131,7 +131,7 @@ describe("LoopsClient", () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 400,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       await expect(client.createContact({ email })).rejects.toThrow(APIError);
@@ -165,7 +165,7 @@ describe("LoopsClient", () => {
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       const result = await client.updateContact({
@@ -198,7 +198,7 @@ describe("LoopsClient", () => {
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       const result = await client.updateContact({
@@ -227,7 +227,7 @@ describe("LoopsClient", () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       const result = await client.updateContact({ email });
@@ -255,7 +255,7 @@ describe("LoopsClient", () => {
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       const result = await client.createContactProperty(name, type);
@@ -279,7 +279,7 @@ describe("LoopsClient", () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 400,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       await expect(
@@ -304,7 +304,7 @@ describe("LoopsClient", () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 400,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       await expect(client.createContactProperty(name, type)).rejects.toThrow(
@@ -341,7 +341,7 @@ describe("LoopsClient", () => {
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       const result = await client.sendEvent(eventData);
@@ -371,7 +371,7 @@ describe("LoopsClient", () => {
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       const result = await client.sendEvent(eventData);
@@ -412,7 +412,7 @@ describe("LoopsClient", () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 400,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       await expect(client.sendEvent(eventData)).rejects.toThrow(APIError);
@@ -440,7 +440,7 @@ describe("LoopsClient", () => {
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       const result = await client.sendEvent(eventData);
@@ -476,7 +476,7 @@ describe("LoopsClient", () => {
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       const result = await client.sendEvent(eventData);
@@ -506,7 +506,7 @@ describe("LoopsClient", () => {
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       const result = await client.sendTransactionalEmail(emailData);
@@ -534,7 +534,7 @@ describe("LoopsClient", () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 404,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       await expect(client.sendTransactionalEmail(emailData)).rejects.toThrow(
@@ -557,6 +557,103 @@ describe("LoopsClient", () => {
       await expect(client.sendTransactionalEmail(emailData)).rejects.toThrow(
         TypeError
       );
+    });
+  });
+
+  describe("non-JSON error responses", () => {
+    it("should handle HTML error response", async () => {
+      const htmlBody = "<html><body>502 Bad Gateway</body></html>";
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 502,
+        headers: new Headers(),
+        text: () => Promise.resolve(htmlBody),
+      });
+
+      try {
+        await client.testApiKey();
+        fail("Should have thrown");
+      } catch (error) {
+        expect(error).toBeInstanceOf(APIError);
+        expect((error as APIError).statusCode).toBe(502);
+        expect((error as APIError).json).toBeNull();
+        expect((error as APIError).rawBody).toBe(htmlBody);
+      }
+    });
+
+    it("should handle plain text error response", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 503,
+        headers: new Headers(),
+        text: () => Promise.resolve("Service Unavailable"),
+      });
+
+      try {
+        await client.testApiKey();
+        fail("Should have thrown");
+      } catch (error) {
+        expect(error).toBeInstanceOf(APIError);
+        expect((error as APIError).statusCode).toBe(503);
+        expect((error as APIError).rawBody).toBe("Service Unavailable");
+      }
+    });
+
+    it("should handle empty body error response", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        headers: new Headers(),
+        text: () => Promise.resolve(""),
+      });
+
+      try {
+        await client.testApiKey();
+        fail("Should have thrown");
+      } catch (error) {
+        expect(error).toBeInstanceOf(APIError);
+        expect((error as APIError).json).toBeNull();
+        expect((error as APIError).rawBody).toBe("");
+      }
+    });
+
+    it("should still parse valid JSON errors normally", async () => {
+      const jsonError = { success: false, message: "Invalid API key" };
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        headers: new Headers(),
+        text: () => Promise.resolve(JSON.stringify(jsonError)),
+      });
+
+      try {
+        await client.testApiKey();
+        fail("Should have thrown");
+      } catch (error) {
+        expect(error).toBeInstanceOf(APIError);
+        expect((error as APIError).json).toEqual(jsonError);
+        expect((error as APIError).rawBody).toBeUndefined();
+      }
+    });
+
+    it("should throw APIError when success response is not JSON", async () => {
+      const htmlBody = "<html><body>OK</body></html>";
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: new Headers(),
+        text: () => Promise.resolve(htmlBody),
+      });
+
+      try {
+        await client.testApiKey();
+        fail("Should have thrown");
+      } catch (error) {
+        expect(error).toBeInstanceOf(APIError);
+        expect((error as APIError).statusCode).toBe(200);
+        expect((error as APIError).json).toBeNull();
+        expect((error as APIError).rawBody).toBe(htmlBody);
+      }
     });
   });
 
@@ -584,7 +681,7 @@ describe("LoopsClient", () => {
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       const result = await client.getTransactionalEmails();
@@ -620,7 +717,7 @@ describe("LoopsClient", () => {
 
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        text: () => Promise.resolve(JSON.stringify(mockResponse)),
       });
 
       const result = await client.getTransactionalEmails();
