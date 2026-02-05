@@ -499,7 +499,10 @@ describe("LoopsClient", () => {
         email: "test@example.com",
         dataVariables: {
           name: "John",
-          product: "Widgets",
+          products: [
+            { name: "Widget", price: 29.99 },
+            { name: "Gadget", price: 49.99 },
+          ],
         },
       };
       const mockResponse = { success: true };
