@@ -32,7 +32,7 @@ import { LoopsClient, APIError } from "loops";
 const loops = new LoopsClient(process.env.LOOPS_API_KEY);
 
 try {
-  const resp = await loops.createContact("email@provider.com");
+  const resp = await loops.createContact({ email: "email@provider.com" });
   // resp.success and resp.id available when successful
 } catch (error) {
   if (error instanceof APIError) {
@@ -60,7 +60,7 @@ import { LoopsClient, APIError, RateLimitExceededError } from "loops";
 const loops = new LoopsClient(process.env.LOOPS_API_KEY);
 
 try {
-  const resp = await loops.createContact("email@provider.com");
+  const resp = await loops.createContact({ email: "email@provider.com" });
 } catch (error) {
   if (error instanceof RateLimitExceededError) {
     console.log(`Rate limit exceeded (${error.limit} per second)`);
@@ -83,6 +83,7 @@ Each contact in Loops has a set of default properties. These will always be retu
 - `subscribed`
 - `userGroup`
 - `userId`
+- `mailingLists`
 - `optInStatus`
 
 ## Custom contact properties
@@ -109,14 +110,7 @@ You can use custom contact properties in API calls. Please make sure to [add cus
 - [updateTransactionalEmail()](#updatetransactionalemail)
 - [ensureTransactionalEmailDraft()](#ensuretransactionalemaildraft)
 - [publishTransactionalEmail()](#publishtransactionalemail)
-- [listTransactionalGroups()](#listtransactionalgroups)
-- [createTransactionalGroup()](#createtransactionalgroup)
-- [getTransactionalGroup()](#gettransactionalgroup)
-- [updateTransactionalGroup()](#updatetransactionalgroup)
 - [listDedicatedSendingIps()](#listdedicatedsendingips)
-- [listAudienceSegments()](#listaudiencesegments)
-- [getAudienceSegment()](#getaudiencesegment)
-- [createAudienceSegment()](#createaudiencesegment)
 - [listThemes()](#listthemes)
 - [getTheme()](#gettheme)
 - [createTheme()](#createtheme)
@@ -129,12 +123,19 @@ You can use custom contact properties in API calls. Please make sure to [add cus
 - [createCampaign()](#createcampaign)
 - [getCampaign()](#getcampaign)
 - [updateCampaign()](#updatecampaign)
+- [getEmailMessage()](#getemailmessage)
+- [updateEmailMessage()](#updateemailmessage)
+- [listTransactionalGroups()](#listtransactionalgroups)
+- [createTransactionalGroup()](#createtransactionalgroup)
+- [getTransactionalGroup()](#gettransactionalgroup)
+- [updateTransactionalGroup()](#updatetransactionalgroup)
+- [listAudienceSegments()](#listaudiencesegments)
+- [getAudienceSegment()](#getaudiencesegment)
+- [createAudienceSegment()](#createaudiencesegment)
 - [listCampaignGroups()](#listcampaigngroups)
 - [createCampaignGroup()](#createcampaigngroup)
 - [getCampaignGroup()](#getcampaigngroup)
 - [updateCampaignGroup()](#updatecampaigngroup)
-- [getEmailMessage()](#getemailmessage)
-- [updateEmailMessage()](#updateemailmessage)
 - [sendEmailMessagePreview()](#sendemailmessagepreview)
 - [runEmailMessageGuardian()](#runemailmessageguardian)
 - [listEventPatterns()](#listeventpatterns)
@@ -926,7 +927,7 @@ const resp = await loops.listTransactionalEmails({ perPage: 15 });
       "name": "Password reset",
       "draftEmailMessageId": "clm8k2n4p000yl70f6g7h8i9j",
       "publishedEmailMessageId": "clm8k2n4p001yl70k1l2m3n4o",
-      "transactionalGroupId": "clq3b7s9u006yl70p5q6r7s8t",
+      "transactionalGroupId": "clg7n5p3q1r9s7t5u3v1w9y7",
       "createdAt": "2025-02-02T02:56:28.845Z",
       "updatedAt": "2025-02-02T02:56:28.845Z",
       "dataVariables": [
@@ -955,7 +956,7 @@ Retrieve a single transactional email by ID.
 #### Example
 
 ```javascript
-const resp = await loops.getTransactionalEmail("clfn0k1yg001imo0fdeqg30i8");
+const resp = await loops.getTransactionalEmail("cll42l54f20i1la0lfooe3z12");
 ```
 
 #### Response
@@ -1033,12 +1034,12 @@ Update a transactional email by ID. At least one field is required.
 #### Example
 
 ```javascript
-const resp = await loops.updateTransactionalEmail("clfn0k1yg001imo0fdeqg30i8", {
+const resp = await loops.updateTransactionalEmail("cll42l54f20i1la0lfooe3z12", {
   name: "Updated name",
 });
 
-const resp = await loops.updateTransactionalEmail("clfn0k1yg001imo0fdeqg30i8", {
-  transactionalGroupId: "clq3b7s9u006yl70p5q6r7s8t",
+const resp = await loops.updateTransactionalEmail("cll42l54f20i1la0lfooe3z12", {
+  transactionalGroupId: "clg7n5p3q1r9s7t5u3v1w9y7",
 });
 ```
 
@@ -1077,7 +1078,7 @@ Ensure a transactional email has a draft email message. Use [`updateEmailMessage
 #### Example
 
 ```javascript
-const resp = await loops.ensureTransactionalEmailDraft("clfn0k1yg001imo0fdeqg30i8");
+const resp = await loops.ensureTransactionalEmailDraft("cll42l54f20i1la0lfooe3z12");
 ```
 
 #### Response
@@ -1114,7 +1115,7 @@ Publish a transactional email's current draft.
 #### Example
 
 ```javascript
-const resp = await loops.publishTransactionalEmail("clfn0k1yg001imo0fdeqg30i8");
+const resp = await loops.publishTransactionalEmail("cll42l54f20i1la0lfooe3z12");
 ```
 
 #### Response
@@ -1305,7 +1306,7 @@ Update a theme's name and/or styles. When `styles` change, the update cascades t
 #### Example
 
 ```javascript
-const resp = await loops.updateTheme("clo1z5q7s004yl70y3z4a5b6c", {
+const resp = await loops.updateTheme("clt3u5v7w9x1y3z5a7b9c1d3", {
   name: "Brand Updated",
 });
 ```
@@ -1833,7 +1834,7 @@ const resp = await loops.listTransactionalGroups();
     {
       "id": "clg7n5p3q1r9s7t5u3v1w9y7",
       "name": "Onboarding",
-      "description": "Top of funnel campaigns",
+      "description": "Transactional emails for new users",
       "createdAt": "2025-06-29T07:47:39.370Z",
       "updatedAt": "2025-06-29T07:47:39.370Z"
     }
@@ -1870,7 +1871,7 @@ const resp = await loops.createTransactionalGroup({
 {
   "id": "clg7n5p3q1r9s7t5u3v1w9y7",
   "name": "Onboarding",
-  "description": "Top of funnel campaigns",
+  "description": "Transactional emails for new users",
   "createdAt": "2025-06-29T07:47:39.370Z",
   "updatedAt": "2025-06-29T07:47:39.370Z"
 }
@@ -1892,7 +1893,7 @@ Retrieve a single transactional group by ID.
 #### Example
 
 ```javascript
-const resp = await loops.getTransactionalGroup("clq3b7s9u006yl70p5q6r7s8t");
+const resp = await loops.getTransactionalGroup("clg7n5p3q1r9s7t5u3v1w9y7");
 ```
 
 #### Response
@@ -1901,7 +1902,7 @@ const resp = await loops.getTransactionalGroup("clq3b7s9u006yl70p5q6r7s8t");
 {
   "id": "clg7n5p3q1r9s7t5u3v1w9y7",
   "name": "Onboarding",
-  "description": "Top of funnel campaigns",
+  "description": "Transactional emails for new users",
   "createdAt": "2025-06-29T07:47:39.370Z",
   "updatedAt": "2025-06-29T07:47:39.370Z"
 }
@@ -1925,7 +1926,7 @@ Update a transactional group's name or description. At least one field must be p
 #### Example
 
 ```javascript
-const resp = await loops.updateTransactionalGroup("clq3b7s9u006yl70p5q6r7s8t", {
+const resp = await loops.updateTransactionalGroup("clg7n5p3q1r9s7t5u3v1w9y7", {
   name: "Updated name",
 });
 ```
@@ -1936,7 +1937,7 @@ const resp = await loops.updateTransactionalGroup("clq3b7s9u006yl70p5q6r7s8t", {
 {
   "id": "clg7n5p3q1r9s7t5u3v1w9y7",
   "name": "Updated name",
-  "description": "Top of funnel campaigns",
+  "description": "Transactional emails for new users",
   "createdAt": "2025-06-29T07:47:39.370Z",
   "updatedAt": "2025-06-29T07:47:39.370Z"
 }
@@ -2013,7 +2014,7 @@ Retrieve a single audience segment by ID.
 #### Example
 
 ```javascript
-const resp = await loops.getAudienceSegment("clr4c8t0v008yl70x3y4z5a6b");
+const resp = await loops.getAudienceSegment("cls6e8g0i2k4m6o8q0s2u4w6");
 ```
 
 #### Response
@@ -2131,8 +2132,7 @@ const resp = await loops.listCampaignGroups();
   },
   "data": [
     {
-      "id": "clg7n5p3q1r9s7t5u3v1w9y7",
-      "name": "Newsletters",
+      "id": "clq3b7s9u007yl70u9v0w1x2y",
       "description": "Monthly product updates",
       "createdAt": "2025-06-29T07:47:39.370Z",
       "updatedAt": "2025-06-29T07:47:39.370Z"
@@ -2167,7 +2167,7 @@ const resp = await loops.createCampaignGroup({
 
 ```json
 {
-  "id": "clg7n5p3q1r9s7t5u3v1w9y7",
+  "id": "clq3b7s9u007yl70u9v0w1x2y",
   "name": "Newsletters",
   "description": "",
   "createdAt": "2025-06-29T07:47:39.370Z",
@@ -2198,7 +2198,7 @@ const resp = await loops.getCampaignGroup("clq3b7s9u007yl70u9v0w1x2y");
 
 ```json
 {
-  "id": "clg7n5p3q1r9s7t5u3v1w9y7",
+  "id": "clq3b7s9u007yl70u9v0w1x2y",
   "name": "Newsletters",
   "description": "Monthly product updates",
   "createdAt": "2025-06-29T07:47:39.370Z",
@@ -2233,7 +2233,7 @@ const resp = await loops.updateCampaignGroup("clq3b7s9u007yl70u9v0w1x2y", {
 
 ```json
 {
-  "id": "clg7n5p3q1r9s7t5u3v1w9y7",
+  "id": "clq3b7s9u007yl70u9v0w1x2y",
   "name": "Newsletters",
   "description": "Monthly product updates",
   "createdAt": "2025-06-29T07:47:39.370Z",
@@ -2273,7 +2273,7 @@ const resp = await loops.sendEmailMessagePreview("clm9x3o5q002yl70a8b3c4d5e", {
 
 ```json
 {
-  "id": "cle5f7g9h1i3j5k7l9m1n3p5"
+  "id": "clm9x3o5q002yl70a8b3c4d5e"
 }
 ```
 
@@ -2553,7 +2553,7 @@ Retrieve a workflow graph with node type names, connections, and selected displa
 #### Example
 
 ```javascript
-const resp = await loops.getWorkflow("cls5d9u1w009yl70c7d8e9f0g");
+const resp = await loops.getWorkflow("clw1a3b5c7d9e1f3g5h7i9j1");
 ```
 
 #### Response
@@ -2601,7 +2601,7 @@ Update a workflow's name and/or description. To change the mailing list, use [`c
 #### Example
 
 ```javascript
-const resp = await loops.updateWorkflow("cls5d9u1w009yl70c7d8e9f0g", {
+const resp = await loops.updateWorkflow("clw1a3b5c7d9e1f3g5h7i9j1", {
   expectedRevisionId: "clrev1s10n2i3d4e5f6g7h8",
   name: "Updated onboarding",
 });
@@ -2654,11 +2654,11 @@ Note: Once deleted, workflows are not returned in other API endpoints.
 #### Example
 
 ```javascript
-await loops.deleteWorkflow("cls5d9u1w009yl70c7d8e9f0g", {
+await loops.deleteWorkflow("clw1a3b5c7d9e1f3g5h7i9j1", {
   expectedRevisionId: "clrev1s10n2i3d4e5f6g7h8",
 });
 
-await loops.deleteWorkflow("cls5d9u1w009yl70c7d8e9f0g", {
+await loops.deleteWorkflow("clw1a3b5c7d9e1f3g5h7i9j1", {
   expectedRevisionId: "clrev1s10n2i3d4e5f6g7h8",
   confirmDelete: true,
 });
@@ -2688,7 +2688,7 @@ Dry run or apply a workflow mailing list change. If queued contacts would be rem
 #### Example
 
 ```javascript
-const resp = await loops.changeWorkflowMailingList("cls5d9u1w009yl70c7d8e9f0g", {
+const resp = await loops.changeWorkflowMailingList("clw1a3b5c7d9e1f3g5h7i9j1", {
   expectedRevisionId: "clrev1s10n2i3d4e5f6g7h8",
   mailingListId: "clm1a2b3c004yl70d5e6f7g8h",
 });
@@ -2737,7 +2737,7 @@ Create a new default workflow node. Use `insertMode: "between"`, `insertMode: "b
 #### Example
 
 ```javascript
-const resp = await loops.createWorkflowNode("cls5d9u1w009yl70c7d8e9f0g", {
+const resp = await loops.createWorkflowNode("clw1a3b5c7d9e1f3g5h7i9j1", {
   expectedRevisionId: "clrev1s10n2i3d4e5f6g7h8",
   insertMode: "between",
   nodeTypeName: "TimerAction",
@@ -2810,7 +2810,7 @@ Retrieve detailed data for a single workflow node. Includes `workflowRevisionId`
 #### Example
 
 ```javascript
-const resp = await loops.getWorkflowNode("cls5d9u1w009yl70c7d8e9f0g", "clt6e0v2x010yl70h1i2j3k4l");
+const resp = await loops.getWorkflowNode("clw1a3b5c7d9e1f3g5h7i9j1", "cln8p0q2r4s6t8u0v2w4x6z8");
 ```
 
 #### Response
@@ -2849,8 +2849,8 @@ Update workflow-node-owned fields for a single node.
 
 ```javascript
 const resp = await loops.updateWorkflowNode(
-  "cls5d9u1w009yl70c7d8e9f0g",
-  "clt6e0v2x010yl70h1i2j3k4l",
+  "clw1a3b5c7d9e1f3g5h7i9j1",
+  "cln8p0q2r4s6t8u0v2w4x6z8",
   {
     expectedRevisionId: "clrev1s10n2i3d4e5f6g7h8",
     payload: { amount: 1, unit: "h" },
@@ -2905,8 +2905,8 @@ Delete a single workflow node. If contacts are queued, the response status is `q
 
 ```javascript
 const resp = await loops.deleteWorkflowNode(
-  "cls5d9u1w009yl70c7d8e9f0g",
-  "clt6e0v2x010yl70h1i2j3k4l",
+  "clw1a3b5c7d9e1f3g5h7i9j1",
+  "cln8p0q2r4s6t8u0v2w4x6z8",
   { expectedRevisionId: "clrev1s10n2i3d4e5f6g7h8" }
 );
 ```
@@ -2953,7 +2953,7 @@ Add a branch and a child node under an existing Branch or Experiment node.
 
 ```javascript
 const resp = await loops.addWorkflowBranch(
-  "cls5d9u1w009yl70c7d8e9f0g",
+  "clw1a3b5c7d9e1f3g5h7i9j1",
   "clt6e0v2x010yl70h1i2j3k4l",
   { expectedRevisionId: "clrev1s10n2i3d4e5f6g7h8" }
 );
@@ -3017,8 +3017,8 @@ Reroute a source node's single outgoing connection to another valid target node.
 
 ```javascript
 const resp = await loops.rerouteWorkflowNode(
-  "cls5d9u1w009yl70c7d8e9f0g",
-  "clt6e0v2x010yl70h1i2j3k4l",
+  "clw1a3b5c7d9e1f3g5h7i9j1",
+  "cln8p0q2r4s6t8u0v2w4x6z8",
   {
     expectedRevisionId: "clrev1s10n2i3d4e5f6g7h8",
     newTargetNodeId: "clu7f1w3y011yl70m5n6o7p8q",
@@ -3071,7 +3071,7 @@ Delete a node and its downstream subtree. If contacts are queued, the response s
 
 ```javascript
 const resp = await loops.deleteWorkflowNodesRecursive(
-  "cls5d9u1w009yl70c7d8e9f0g",
+  "clw1a3b5c7d9e1f3g5h7i9j1",
   "clt6e0v2x010yl70h1i2j3k4l",
   { expectedRevisionId: "clrev1s10n2i3d4e5f6g7h8", queuedContactPolicy: "discard" }
 );
@@ -3151,7 +3151,7 @@ Finalize an asset after the file has been uploaded to the pre-signed URL.
 #### Example
 
 ```javascript
-const resp = await loops.completeUpload("clu7f1w3y011yl70m5n6o7p8q");
+const resp = await loops.completeUpload("cla3s5s7e9t1i3d5f7g9h1j3");
 ```
 
 #### Response
